@@ -22,8 +22,8 @@ export default function PricingPage() {
         body: JSON.stringify({
           priceId,
           customerEmail: '', // In production, get from auth
-          successUrl: `${window.location.origin}/dashboard?success=true`,
-          cancelUrl: `${window.location.origin}/pricing?canceled=true`
+          successUrl: `/dashboard?success=true`,
+          cancelUrl: `/pricing?canceled=true`
         }),
       })
 

@@ -7,7 +7,7 @@
   
   const CHURN_AI_CONFIG = {
     tenantId: tenantId,
-    apiUrl: window.location.origin.includes('localhost') ? 'http://localhost:3000' : 'https://churnai.com',
+    apiUrl: window.location.origin,
   };
 
   let modalOpen = false;

@@ -19,9 +19,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
     const defaultSuccessUrl = `${baseUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`;
-    const defaultCancelUrl = `${baseUrl}?canceled=true`;
+    const defaultCancelUrl = `${baseUrl}/pricing?canceled=true`;
 
     const result = await createCheckoutSession(
       priceId,
