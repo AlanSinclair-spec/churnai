@@ -39,10 +39,7 @@ export default function SignupPage() {
         setError(error.message);
       } else {
         setSuccess(true);
-        // Auto-redirect after successful signup
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 2000);
+        // Don't auto-redirect - user needs to check email first
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -59,8 +56,8 @@ export default function SignupPage() {
             <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <ArrowRight className="w-8 h-8 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold">Welcome to ChurnAI!</CardTitle>
-            <CardDescription>Your account has been created successfully. Redirecting to dashboard...</CardDescription>
+            <CardTitle className="text-2xl font-bold">Check your email!</CardTitle>
+            <CardDescription>We've sent you a confirmation link. Click it to activate your account and access the dashboard.</CardDescription>
           </CardHeader>
         </Card>
       </div>

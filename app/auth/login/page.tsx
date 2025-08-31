@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  useEffect(() => {
+    // Check for error in URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    if (errorParam === 'confirmation_failed') {
+      setError('Email confirmation failed. Please try signing up again or contact support.');
+    }
+  }, []);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
