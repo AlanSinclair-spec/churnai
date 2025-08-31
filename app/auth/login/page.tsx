@@ -28,8 +28,11 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login form submitted');
     setLoading(true);
     setError('');
+
+    console.log('Attempting login with email:', email);
 
     try {
       const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -37,13 +40,18 @@ export default function LoginPage() {
         password,
       });
 
+      console.log('Supabase response:', { data, error });
+
       if (error) {
+        console.error('Login error:', error);
         setError(error.message);
       } else {
+        console.log('Login successful, redirecting to dashboard');
         router.push('/dashboard');
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      console.error('Unexpected error during login:', err);
+      setError(`An unexpected error occurred: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -103,6 +111,10 @@ export default function LoginPage() {
               type="submit" 
               className="w-full bg-gradient-to-r from-indigo-900 to-violet-600 hover:from-indigo-800 hover:to-violet-500"
               disabled={loading}
+              onClick={(e) => {
+                console.log('Button clicked');
+                handleLogin(e);
+              }}
             >
               {loading ? 'Signing in...' : 'Sign In'}
               <ArrowRight className="ml-2 h-4 w-4" />
