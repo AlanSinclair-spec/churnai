@@ -1,157 +1,145 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { applyDiscount, pauseSubscription } from '../../../lib/stripe';
-import { logEvent, saveConversation } from '../../../lib/supabase';
+import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
-interface ApplyOfferRequest {
-  tenantId: string;
-  customerId: string;
-  offer: {
-    offerType: 'discount' | 'pause' | 'downgrade' | 'none';
-    offerValue: string;
-    message: string;
-    conversationId?: string;
-  };
-  accepted: boolean;
-  subscriptionId?: string;
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-08-27.basil',
+});
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
 export async function POST(request: NextRequest) {
   try {
-    const body: ApplyOfferRequest = await request.json();
-    const { tenantId, customerId, offer, accepted, subscriptionId } = body;
+    const { 
+      subscriptionId, 
+      customerId,
+      action, 
+      payload,
+      conversationId,
+      tenantId 
+    } = await request.json();
 
-    if (!tenantId || !customerId || !offer) {
-      return NextResponse.json(
-        { error: 'Missing required fields: tenantId, customerId, offer' },
-        { status: 400 }
-      );
+    let result: any = null;
+
+    switch (action) {
+      case 'discount':
+        // Create a coupon programmatically
+        const coupon = await stripe.coupons.create({
+          percent_off: payload.percent_off || 20,
+          duration: 'repeating',
+          duration_in_months: payload.duration_months || 3,
+          id: `SAVE_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        });
+
+        // Apply the coupon to the subscription
+        const updatedSubscription = await stripe.subscriptions.update(subscriptionId, {
+          discounts: [{
+            coupon: coupon.id,
+          }],
+        });
+
+        result = {
+          success: true,
+          action: 'discount',
+          couponId: coupon.id,
+          subscriptionStatus: updatedSubscription.status,
+        };
+
+        // Calculate revenue saved (monthly price * discount * months)
+        const monthlyAmount = updatedSubscription.items.data[0].price.unit_amount || 0;
+        const revenueSaved = (monthlyAmount / 100) * (payload.percent_off / 100) * payload.duration_months;
+
+        // Update conversation with success
+        await supabase
+          .from('conversations')
+          .update({ 
+            accepted: true,
+            revenue_saved: Math.round(revenueSaved)
+          })
+          .eq('id', conversationId);
+
+        break;
+
+      case 'pause':
+        // Pause the subscription by setting pause_collection
+        const pausedSubscription = await stripe.subscriptions.update(subscriptionId, {
+          pause_collection: {
+            behavior: 'void',
+            resumes_at: Math.floor(Date.now() / 1000) + (payload.months * 30 * 24 * 60 * 60),
+          },
+        });
+
+        result = {
+          success: true,
+          action: 'pause',
+          resumesAt: new Date(pausedSubscription.pause_collection?.resumes_at! * 1000),
+          subscriptionStatus: pausedSubscription.status,
+        };
+
+        // Calculate revenue saved (monthly amount * pause months)
+        const pauseMonthlyAmount = pausedSubscription.items.data[0].price.unit_amount || 0;
+        const pauseRevenueSaved = (pauseMonthlyAmount / 100) * payload.months;
+
+        await supabase
+          .from('conversations')
+          .update({ 
+            accepted: true,
+            revenue_saved: Math.round(pauseRevenueSaved)
+          })
+          .eq('id', conversationId);
+
+        break;
+
+      case 'nudge':
+        // Just log the nudge action, no Stripe changes needed
+        result = {
+          success: true,
+          action: 'nudge',
+          message: payload.message,
+        };
+
+        await supabase
+          .from('conversations')
+          .update({ 
+            accepted: true,
+            revenue_saved: 0
+          })
+          .eq('id', conversationId);
+
+        break;
+
+      default:
+        throw new Error(`Unknown action: ${action}`);
     }
 
-    // Log the event regardless of acceptance
-    const eventData = {
-      customer_id: customerId,
-      offer_type: offer.offerType,
-      offer_value: offer.offerValue,
-      accepted: accepted,
-      message: offer.message,
-      conversation_id: offer.conversationId,
-    };
-
-    try {
-      await logEvent(tenantId, 'offer_response', eventData);
-    } catch (error) {
-      console.error('Error logging event:', error);
-    }
-
-    // Update conversation record
-    try {
-      await saveConversation({
+    // Log event
+    await supabase
+      .from('events')
+      .insert({
         tenant_id: tenantId,
-        customer_email: customerId, // In production, resolve customer ID to email
-        reason: 'cancellation_attempt',
-        offer_type: offer.offerType,
-        offer_value: offer.offerValue,
-        accepted: accepted,
-      });
-    } catch (error) {
-      console.error('Error updating conversation:', error);
-    }
-
-    // If offer was declined, just return success
-    if (!accepted) {
-      return NextResponse.json({
-        success: true,
-        message: 'Offer declined, logged for analytics',
-        action: 'declined'
-      });
-    }
-
-    // If offer was accepted, apply it via Stripe
-    if (!subscriptionId) {
-      return NextResponse.json(
-        { error: 'Subscription ID required to apply offer' },
-        { status: 400 }
-      );
-    }
-
-    let stripeResult;
-
-    try {
-      switch (offer.offerType) {
-        case 'discount':
-          const discountPercent = parseInt(offer.offerValue);
-          stripeResult = await applyDiscount({
-            subscriptionId,
-            discountPercent,
-            durationInMonths: 3 // Default to 3 months
-          });
-          break;
-
-        case 'pause':
-          const pauseMonths = parseInt(offer.offerValue);
-          stripeResult = await pauseSubscription({
-            subscriptionId,
-            pauseDurationInMonths: pauseMonths
-          });
-          break;
-
-        case 'downgrade':
-          // For downgrade, you would typically update the subscription to a different price
-          // This is a simplified implementation
-          stripeResult = {
-            success: true,
-            message: 'Downgrade request received - will be processed manually'
-          };
-          break;
-
-        default:
-          return NextResponse.json(
-            { error: 'Invalid offer type' },
-            { status: 400 }
-          );
-      }
-
-      if (!stripeResult.success) {
-        throw new Error(stripeResult.error || 'Stripe operation failed');
-      }
-
-      // Log successful application
-      await logEvent(tenantId, 'offer_applied', {
-        ...eventData,
-        stripe_result: stripeResult,
-        subscription_id: subscriptionId
+        conversation_id: conversationId,
+        type: 'offer_applied',
+        data: result,
       });
 
-      return NextResponse.json({
-        success: true,
-        message: 'Offer applied successfully',
-        action: 'applied',
-        details: stripeResult
+    return NextResponse.json(result);
+  } catch (error: any) {
+    console.error('Apply offer error:', error);
+    
+    // Log failure event
+    await supabase
+      .from('events')
+      .insert({
+        tenant_id: request.headers.get('x-tenant-id'),
+        type: 'offer_failed',
+        data: { error: error.message },
       });
 
-    } catch (stripeError) {
-      console.error('Stripe error:', stripeError);
-      
-      // Log the failure
-      await logEvent(tenantId, 'offer_application_failed', {
-        ...eventData,
-        error: stripeError instanceof Error ? stripeError.message : 'Unknown error',
-        subscription_id: subscriptionId
-      });
-
-      return NextResponse.json(
-        { 
-          error: 'Failed to apply offer',
-          details: stripeError instanceof Error ? stripeError.message : 'Unknown error'
-        },
-        { status: 500 }
-      );
-    }
-
-  } catch (error) {
-    console.error('Apply offer API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error.message || 'Failed to apply offer' },
       { status: 500 }
     );
   }
