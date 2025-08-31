@@ -29,8 +29,10 @@ export default function SignupPage() {
         email,
         password,
         options: {
+          emailRedirectTo: undefined,
           data: {
             full_name: name,
+            skip_confirmation: true
           }
         }
       });
@@ -38,8 +40,8 @@ export default function SignupPage() {
       if (error) {
         setError(error.message);
       } else {
-        setSuccess(true);
-        // Don't auto-redirect - user needs to check email first
+        console.log('Signup successful, redirecting to dashboard');
+        router.push('/dashboard');
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -48,21 +50,7 @@ export default function SignupPage() {
     }
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-violet-600 to-indigo-900 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ArrowRight className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold">Check your email!</CardTitle>
-            <CardDescription>We've sent you a confirmation link. Click it to activate your account and access the dashboard.</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
+  // Remove success state since we're redirecting immediately
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-violet-600 to-indigo-900 flex items-center justify-center p-4">

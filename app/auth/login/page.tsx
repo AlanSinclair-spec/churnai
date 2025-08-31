@@ -111,10 +111,6 @@ export default function LoginPage() {
               type="submit" 
               className="w-full bg-gradient-to-r from-indigo-900 to-violet-600 hover:from-indigo-800 hover:to-violet-500"
               disabled={loading}
-              onClick={(e) => {
-                console.log('Button clicked');
-                handleLogin(e);
-              }}
             >
               {loading ? 'Signing in...' : 'Sign In'}
               <ArrowRight className="ml-2 h-4 w-4" />
