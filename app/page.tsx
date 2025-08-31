@@ -54,12 +54,12 @@ export default function ChurnAILanding() {
               <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
                 About
               </a>
-              <Link href="/dashboard">
+              <Link href="/auth/login">
                 <Button variant="outline" size="sm">
                   Sign In
                 </Button>
               </Link>
-              <Link href="/dashboard">
+              <Link href="/auth/signup">
                 <Button
                   size="sm"
                   className="bg-gradient-to-r from-indigo-900 to-violet-600 hover:from-indigo-800 hover:to-violet-500"
