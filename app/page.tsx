@@ -79,17 +79,17 @@ export default function ChurnAILanding() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
             <Badge className="mb-6 bg-white/10 text-white border-white/20 hover:bg-white/20 transition-colors">
-              🚀 AI-Powered Retention Platform
+              🚀 Smart Retention Platform
             </Badge>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 text-balance">
               Stop churn before it happens
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto text-pretty">
-              AI-powered subscription retention that intercepts cancellations and increases revenue by 40%. Turn
+              Smart subscription retention that intercepts cancellations and saves 15-30% of at-risk customers. Turn
               churning customers into loyal subscribers.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Link href="/dashboard">
+              <Link href="/auth/signup">
                 <Button
                   size="lg"
                   className="bg-white text-indigo-900 hover:bg-white/90 font-semibold px-8 py-4 text-lg animate-pulse-glow"
@@ -98,14 +98,6 @@ export default function ChurnAILanding() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 px-8 py-4 text-lg bg-transparent"
-                onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                See Demo
-              </Button>
             </div>
 
             {/* Value Props */}
@@ -133,7 +125,7 @@ export default function ChurnAILanding() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">How ChurnAI Works</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Our AI identifies at-risk customers and intervenes with personalized retention strategies
+              Our smart system identifies at-risk customers and intervenes with personalized retention strategies
             </p>
           </div>
 
@@ -148,7 +140,7 @@ export default function ChurnAILanding() {
               </CardHeader>
               <CardContent className="text-center">
                 <CardDescription className="text-base leading-relaxed">
-                  AI detects cancellation intent through behavioral patterns, support tickets, and usage analytics
+                  Smart detection identifies cancellation intent through behavioral patterns, support tickets, and usage analytics
                   before customers hit cancel.
                 </CardDescription>
               </CardContent>
@@ -194,7 +186,10 @@ export default function ChurnAILanding() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 gradient-text">Simple, Transparent Pricing</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Choose the plan that fits your business. All plans include our core AI retention features.
+              Choose the plan that fits your business. All plans include our core retention features.
+            </p>
+            <p className="text-sm text-muted-foreground mt-4 font-medium">
+              Beta pricing - early users locked in at this rate
             </p>
           </div>
 
@@ -216,7 +211,7 @@ export default function ChurnAILanding() {
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-emerald-500" />
-                  <span>Basic AI retention flows</span>
+                  <span>Basic retention flows</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-emerald-500" />
@@ -226,7 +221,7 @@ export default function ChurnAILanding() {
                   <CheckCircle className="h-5 w-5 text-emerald-500" />
                   <span>Basic analytics</span>
                 </div>
-                <Link href="/dashboard">
+                <Link href="/auth/signup">
                   <Button className="w-full mt-8 bg-gradient-to-r from-indigo-900 to-violet-600 hover:from-indigo-800 hover:to-violet-500">
                     Start Free Trial
                   </Button>
@@ -254,7 +249,7 @@ export default function ChurnAILanding() {
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-emerald-500" />
-                  <span>Advanced AI retention flows</span>
+                  <span>Advanced retention flows</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-emerald-500" />
@@ -268,7 +263,7 @@ export default function ChurnAILanding() {
                   <CheckCircle className="h-5 w-5 text-emerald-500" />
                   <span>Custom retention campaigns</span>
                 </div>
-                <Link href="/dashboard">
+                <Link href="/auth/signup">
                   <Button className="w-full mt-8 bg-gradient-to-r from-indigo-900 to-violet-600 hover:from-indigo-800 hover:to-violet-500">
                     Start Free Trial
                   </Button>
@@ -293,7 +288,7 @@ export default function ChurnAILanding() {
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-emerald-500" />
-                  <span>Enterprise AI features</span>
+                  <span>Enterprise retention features</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-emerald-500" />
@@ -326,19 +321,12 @@ export default function ChurnAILanding() {
             Join thousands of SaaS companies using ChurnAI to increase retention and grow revenue.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/dashboard">
+            <Link href="/auth/signup">
               <Button size="lg" className="bg-white text-indigo-900 hover:bg-white/90 font-semibold px-8 py-4 text-lg">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 px-8 py-4 text-lg bg-transparent"
-            >
-              Schedule Demo
-            </Button>
           </div>
         </div>
       </section>
